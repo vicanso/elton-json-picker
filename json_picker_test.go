@@ -9,7 +9,7 @@ import (
 	"github.com/vicanso/cod"
 )
 
-func TestdefaultValidate(t *testing.T) {
+func TestDefaultValidate(t *testing.T) {
 	resp := httptest.NewRecorder()
 	c := cod.NewContext(resp, nil)
 	if defaultValidate(c) {
@@ -55,9 +55,7 @@ func TestJSONPicker(t *testing.T) {
 		c.Next = func() error {
 			return nil
 		}
-		fn := New(Config{
-			Field: "fields",
-		})
+		fn := NewDefault("fields")
 		err := fn(c)
 		if err != nil {
 			t.Fatalf("json pick fail, %v", err)

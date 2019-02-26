@@ -16,7 +16,6 @@ package jsonpicker
 
 import (
 	"bytes"
-	"net/http"
 	"strings"
 
 	"github.com/vicanso/cod"
@@ -29,20 +28,12 @@ var (
 		if c.BodyBuffer == nil || c.BodyBuffer.Len() == 0 {
 			return false
 		}
-		statusCode := c.StatusCode
-		// http状态码如果非 >= 200 < 300，则不符合
-		if statusCode < http.StatusOK ||
-			statusCode >= http.StatusMultipleChoices {
-			return false
-		}
 		// 如果非json，则不符合
 		if !strings.Contains(c.GetHeader(cod.HeaderContentType), "json") {
 			return false
 		}
 		return true
 	}
-
-	commaBytes = []byte(",")
 )
 
 type (
@@ -55,6 +46,13 @@ type (
 		Skipper  cod.Skipper
 	}
 )
+
+// NewDefault create default json picker middleware
+func NewDefault(field string) cod.Handler {
+	return New(Config{
+		Field: field,
+	})
+}
 
 // New create a json picker middleware
 func New(config Config) cod.Handler {
