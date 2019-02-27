@@ -71,7 +71,8 @@ func New(config Config) cod.Handler {
 		if skipper(c) {
 			return c.Next()
 		}
-		fields := c.Query()[config.Field]
+
+		fields := c.QueryParam(config.Field)
 		err = c.Next()
 
 		// 出错或未指定筛选的字段或不符合则跳过

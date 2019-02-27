@@ -1,5 +1,7 @@
 # cod-json-picker
 
+[![Build Status](https://img.shields.io/travis/vicanso/cod-json-picker.svg?label=linux+build)](https://travis-ci.org/vicanso/cod-json-picker)
+
 JSON picker for cod, it can pick fields from json response.
 
 ```go
