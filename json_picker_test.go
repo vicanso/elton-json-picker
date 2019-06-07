@@ -3,49 +3,43 @@ package jsonpicker
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http/httptest"
+	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/vicanso/cod"
 )
 
 func TestDefaultValidate(t *testing.T) {
+	assert := assert.New(t)
 	resp := httptest.NewRecorder()
 	c := cod.NewContext(resp, nil)
-	if defaultValidate(c) {
-		t.Fatalf("nil body buffer should return false")
-	}
+	assert.False(defaultValidate(c), "nil body buffer should return false")
+
 	c.BodyBuffer = bytes.NewBufferString("")
-	if defaultValidate(c) {
-		t.Fatalf("empty body buffer should return false")
-	}
+	assert.False(defaultValidate(c), "empty body buffer should return false")
+
 	c.BodyBuffer = bytes.NewBufferString(`{
 		"name": "tree.xie"
 	}`)
-	if defaultValidate(c) {
-		t.Fatalf("status code <200 should return false")
-	}
-	c.StatusCode = 400
+	assert.False(defaultValidate(c), "status code <200 should return false")
 
-	if defaultValidate(c) {
-		t.Fatalf("status code >= 300 should return false")
-	}
+	c.StatusCode = 400
+	assert.False(defaultValidate(c), "status code >= 300 should return false")
 
 	c.StatusCode = 200
-
-	if defaultValidate(c) {
-		t.Fatalf("not json should return false")
-	}
+	assert.False(defaultValidate(c), "not json should return false")
 
 	c.SetHeader(cod.HeaderContentType, cod.MIMEApplicationJSON)
-	if !defaultValidate(c) {
-		t.Fatalf("should be valid")
-	}
+	assert.True(defaultValidate(c), "json data should return true")
 }
 
 func TestJSONPicker(t *testing.T) {
 
 	t.Run("no field", func(t *testing.T) {
+		assert := assert.New(t)
 		req := httptest.NewRequest("GET", "/users/me", nil)
 		c := cod.NewContext(nil, req)
 		c.BodyBuffer = bytes.NewBufferString(`{
@@ -57,9 +51,7 @@ func TestJSONPicker(t *testing.T) {
 		}
 		fn := NewDefault("fields")
 		err := fn(c)
-		if err != nil {
-			t.Fatalf("json pick fail, %v", err)
-		}
+		assert.Nil(err, "json pick fail")
 	})
 
 	t.Run("pick", func(t *testing.T) {
@@ -95,25 +87,36 @@ func TestJSONPicker(t *testing.T) {
 			Field: "fields",
 		})
 		t.Run("pick fields", func(t *testing.T) {
+			assert := assert.New(t)
 			err := fn(c)
-			if err != nil {
-				t.Fatalf("json picker fail, %v", err)
-			}
-			if c.BodyBuffer.String() != `{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}` {
-				t.Fatalf("json pick fail")
-			}
+			assert.Nil(err, "json picker fail")
+			assert.Equal(c.BodyBuffer.String(), `{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}`)
 		})
 
 		t.Run("omit fields", func(t *testing.T) {
+			assert := assert.New(t)
 			req := httptest.NewRequest("GET", "/users/me?fields=-x", nil)
 			c.Request = req
 			err := fn(c)
-			if err != nil {
-				t.Fatalf("omit picker fail, %v", err)
-			}
-			if c.BodyBuffer.String() != `{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}` {
-				t.Fatalf("json pick fail")
-			}
+			assert.Nil(err, "omit picker fail")
+			assert.Equal(c.BodyBuffer.String(), `{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}`)
 		})
 	})
+}
+
+// https://stackoverflow.com/questions/50120427/fail-unit-tests-if-coverage-is-below-certain-percentage
+func TestMain(m *testing.M) {
+	// call flag.Parse() here if TestMain uses flags
+	rc := m.Run()
+
+	// rc 0 means we've passed,
+	// and CoverMode will be non empty if run with -cover
+	if rc == 0 && testing.CoverMode() != "" {
+		c := testing.Coverage()
+		if c < 0.9 {
+			fmt.Println("Tests passed but coverage failed at", c)
+			rc = -1
+		}
+	}
+	os.Exit(rc)
 }
