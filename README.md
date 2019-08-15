@@ -1,8 +1,8 @@
-# cod-json-picker
+# elton-json-picker
 
-[![Build Status](https://img.shields.io/travis/vicanso/cod-json-picker.svg?label=linux+build)](https://travis-ci.org/vicanso/cod-json-picker)
+[![Build Status](https://img.shields.io/travis/vicanso/elton-json-picker.svg?label=linux+build)](https://travis-ci.org/vicanso/elton-json-picker)
 
-JSON picker for cod, it can pick fields from json response.
+JSON picker for elton, it can pick fields from json response.
 
 ```go
 package main
@@ -10,20 +10,20 @@ package main
 import (
 	"bytes"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 
-	jp "github.com/vicanso/cod-json-picker"
+	jp "github.com/vicanso/elton-json-picker"
 )
 
 func main() {
 
-	d := cod.New()
+	d := elton.New()
 
 	d.Use(jp.NewDefault("_fields"))
 
 	// http://127.0.0.1:7001/?_fields=foo,id
-	d.GET("/", func(c *cod.Context) (err error) {
-		c.SetHeader(cod.HeaderContentType, cod.MIMEApplicationJSON)
+	d.GET("/", func(c *elton.Context) (err error) {
+		c.SetHeader(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		c.BodyBuffer = bytes.NewBufferString(`{
 			"foo": "bar",
 			"id": 1,

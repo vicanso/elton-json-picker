@@ -18,18 +18,18 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 	sj "github.com/vicanso/superjson"
 )
 
 var (
-	defaultValidate = func(c *cod.Context) bool {
+	defaultValidate = func(c *elton.Context) bool {
 		// 如果响应数据为空，则不符合
 		if c.BodyBuffer == nil || c.BodyBuffer.Len() == 0 {
 			return false
 		}
 		// 如果非json，则不符合
-		if !strings.Contains(c.GetHeader(cod.HeaderContentType), "json") {
+		if !strings.Contains(c.GetHeader(elton.HeaderContentType), "json") {
 			return false
 		}
 		return true
@@ -38,27 +38,27 @@ var (
 
 type (
 	// Validate json picker validate
-	Validate func(*cod.Context) bool
+	Validate func(*elton.Context) bool
 	// Config json picker config
 	Config struct {
 		Validate Validate
 		Field    string
-		Skipper  cod.Skipper
+		Skipper  elton.Skipper
 	}
 )
 
 // NewDefault create default json picker middleware
-func NewDefault(field string) cod.Handler {
+func NewDefault(field string) elton.Handler {
 	return New(Config{
 		Field: field,
 	})
 }
 
 // New create a json picker middleware
-func New(config Config) cod.Handler {
+func New(config Config) elton.Handler {
 	skipper := config.Skipper
 	if skipper == nil {
-		skipper = cod.DefaultSkipper
+		skipper = elton.DefaultSkipper
 	}
 	if config.Field == "" {
 		panic("require filed")
@@ -67,7 +67,7 @@ func New(config Config) cod.Handler {
 	if validate == nil {
 		validate = defaultValidate
 	}
-	return func(c *cod.Context) (err error) {
+	return func(c *elton.Context) (err error) {
 		if skipper(c) {
 			return c.Next()
 		}

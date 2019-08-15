@@ -9,13 +9,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vicanso/cod"
+	"github.com/vicanso/elton"
 )
 
 func TestDefaultValidate(t *testing.T) {
 	assert := assert.New(t)
 	resp := httptest.NewRecorder()
-	c := cod.NewContext(resp, nil)
+	c := elton.NewContext(resp, nil)
 	assert.False(defaultValidate(c), "nil body buffer should return false")
 
 	c.BodyBuffer = bytes.NewBufferString("")
@@ -32,7 +32,7 @@ func TestDefaultValidate(t *testing.T) {
 	c.StatusCode = 200
 	assert.False(defaultValidate(c), "not json should return false")
 
-	c.SetHeader(cod.HeaderContentType, cod.MIMEApplicationJSON)
+	c.SetHeader(elton.HeaderContentType, elton.MIMEApplicationJSON)
 	assert.True(defaultValidate(c), "json data should return true")
 }
 
@@ -41,7 +41,7 @@ func TestJSONPicker(t *testing.T) {
 	t.Run("no field", func(t *testing.T) {
 		assert := assert.New(t)
 		req := httptest.NewRequest("GET", "/users/me", nil)
-		c := cod.NewContext(nil, req)
+		c := elton.NewContext(nil, req)
 		c.BodyBuffer = bytes.NewBufferString(`{
 			"name": "tree.xie",
 			"type": "vip"
@@ -57,7 +57,7 @@ func TestJSONPicker(t *testing.T) {
 	t.Run("pick", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/users/me?fields=i,f,s,b,arr,m,null,xx", nil)
 		resp := httptest.NewRecorder()
-		c := cod.NewContext(resp, req)
+		c := elton.NewContext(resp, req)
 		m := map[string]interface{}{
 			"_x": "abcd",
 			"i":  1,
@@ -82,7 +82,7 @@ func TestJSONPicker(t *testing.T) {
 		c.Next = func() error {
 			return nil
 		}
-		c.SetHeader(cod.HeaderContentType, cod.MIMEApplicationJSON)
+		c.SetHeader(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		fn := New(Config{
 			Field: "fields",
 		})
