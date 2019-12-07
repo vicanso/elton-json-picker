@@ -16,6 +16,7 @@ package jsonpicker
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 
 	"github.com/vicanso/elton"
@@ -61,7 +62,7 @@ func New(config Config) elton.Handler {
 		skipper = elton.DefaultSkipper
 	}
 	if config.Field == "" {
-		panic("require filed")
+		panic(errors.New("require filed"))
 	}
 	validate := config.Validate
 	if validate == nil {

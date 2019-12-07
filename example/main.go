@@ -1,10 +1,3 @@
-# elton-json-picker
-
-[![Build Status](https://img.shields.io/travis/vicanso/elton-json-picker.svg?label=linux+build)](https://travis-ci.org/vicanso/elton-json-picker)
-
-JSON picker for elton, it can pick fields from json response.
-
-```go
 package main
 
 import (
@@ -34,4 +27,3 @@ func main() {
 
 	d.ListenAndServe(":3000")
 }
-```
