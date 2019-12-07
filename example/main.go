@@ -25,5 +25,8 @@ func main() {
 		return
 	})
 
-	d.ListenAndServe(":3000")
+	err := d.ListenAndServe(":3000")
+	if err != nil {
+		panic(err)
+	}
 }
