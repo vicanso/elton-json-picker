@@ -55,51 +55,55 @@ func TestJSONPicker(t *testing.T) {
 	})
 
 	t.Run("pick", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/users/me?fields=i,f,s,b,arr,m,null,xx", nil)
-		resp := httptest.NewRecorder()
-		c := elton.NewContext(resp, req)
-		m := map[string]interface{}{
-			"_x": "abcd",
-			"i":  1,
-			"f":  1.12,
-			"s":  "\"abc",
-			"b":  false,
-			"arr": []interface{}{
-				1,
-				"2",
-				true,
-			},
-			"m": map[string]interface{}{
-				"a": 1,
-				"b": "2",
-				"c": false,
-			},
-			"null": nil,
+		genContext := func(url string) *elton.Context {
+
+			req := httptest.NewRequest("GET", url, nil)
+			resp := httptest.NewRecorder()
+			c := elton.NewContext(resp, req)
+			m := map[string]interface{}{
+				"_x": "abcd",
+				"i":  1,
+				"f":  1.12,
+				"s":  "\"abc",
+				"b":  false,
+				"arr": []interface{}{
+					1,
+					"2",
+					true,
+				},
+				"m": map[string]interface{}{
+					"a": 1,
+					"b": "2",
+					"c": false,
+				},
+				"null": nil,
+			}
+			buf, _ := json.Marshal(m)
+			c.BodyBuffer = bytes.NewBuffer(buf)
+			c.StatusCode = 200
+			c.Next = func() error {
+				return nil
+			}
+			c.SetHeader(elton.HeaderContentType, elton.MIMEApplicationJSON)
+			return c
 		}
-		buf, _ := json.Marshal(m)
-		c.BodyBuffer = bytes.NewBuffer(buf)
-		c.StatusCode = 200
-		c.Next = func() error {
-			return nil
-		}
-		c.SetHeader(elton.HeaderContentType, elton.MIMEApplicationJSON)
 		fn := New(Config{
 			Field: "fields",
 		})
 		t.Run("pick fields", func(t *testing.T) {
+			c := genContext("/users/me?fields=i,f,s,b,arr,m,null,xx")
 			assert := assert.New(t)
 			err := fn(c)
 			assert.Nil(err, "json picker fail")
-			assert.Equal(c.BodyBuffer.String(), `{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}`)
+			assert.Equal(`{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}`, c.BodyBuffer.String())
 		})
 
 		t.Run("omit fields", func(t *testing.T) {
 			assert := assert.New(t)
-			req := httptest.NewRequest("GET", "/users/me?fields=-x", nil)
-			c.Request = req
+			c := genContext("/users/me?fields=-_x")
 			err := fn(c)
 			assert.Nil(err, "omit picker fail")
-			assert.Equal(c.BodyBuffer.String(), `{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}`)
+			assert.Equal(`{"arr":[1,"2",true],"b":false,"f":1.12,"i":1,"m":{"a":1,"b":"2","c":false},"s":"\"abc"}`, c.BodyBuffer.String())
 		})
 	})
 }
