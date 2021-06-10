@@ -1,6 +1,7 @@
 # elton-json-picker
 
-[![Build Status](https://img.shields.io/travis/vicanso/elton-json-picker.svg?label=linux+build)](https://travis-ci.org/vicanso/elton-json-picker)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/vicanso/elton-json-picker/blob/master/LICENSE)
+[![Build Status](https://github.com/vicanso/elton-json-picker/workflows/Test/badge.svg)](https://github.com/vicanso/elton-json-picker/actions)
 
 JSON picker for elton, it can pick fields from json response.
 
